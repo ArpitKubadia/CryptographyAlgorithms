@@ -1,11 +1,16 @@
 from Crypto.Cipher import AES
 from datetime import datetime
 from Crypto import Random
-# Encryption
+from xlwt import Workbook
+
+wb=Workbook()
+output=wb.add_sheet('AES')
+output.write(0,0,'Message Size')
+output.write(0,1,'Encryption time')
+output.write(0,2,'Decryption time')
+output.write(0,3,'Cipher text Size')
 
 
-#print(message)
-#time1=time.time()
 def encryption(message):
 	start=datetime.now()
 	encryption_suite = AES.new(key, AES.MODE_CFB,iv)
@@ -14,7 +19,7 @@ def encryption(message):
 	total=end-start
 	total=total.total_seconds()
 	print("Encryption time:",total)
-	return cipher_text
+	return cipher_text,total
 
 
 #print (cipher_text)
@@ -29,13 +34,12 @@ def decryption(cipher_text):
 	total=end-start
 	total=total.total_seconds()
 	print("Decryption time:",total)
-	return plain_text
+	return plain_text,total
 
 key=b"Jsp3nd762MAO283N"
 #iv=b"This is an IV456"
 iv=Random.new().read(AES.block_size)
 print("Block Size: ",AES.block_size)
-
 #message=b'A really secret message. Not for prying eyes.'
 for i in range (8):
 	f=open('ciphertext_1mb.txt',encoding="ANSI")
@@ -43,14 +47,21 @@ for i in range (8):
 	message='null'
 	for j in range(2**i):
 		message+=inp
+	output.write(i+1,0,round(len(message)/(1024*1024)))
 	print("Message size(mb): ", len(message)/(1024*1024))
 	message=str.encode(message)
-	cipher_text=encryption(message)
-	plain_text=decryption(cipher_text)	
+	cipher_text,time_enc=encryption(message)
+	plain_text,time_dec=decryption(cipher_text)	
 	print(message==plain_text)
 	#print("Message size(mb): ", len(message)/(1024*1024))
 	print("Cipher text size(mb): ",len(cipher_text)/(1024*1024))
 	print("\n\n")
+	#worksheet.write(len(message)/(1024*1024),time_enc,time_dec,len(cipher_text)/(1024*1024))
+	output.write(i+1,1,time_enc)
+	output.write(i+1,2,time_dec)
+	output.write(i+1,3,len(cipher_text)/(1024*1024))
+
+wb.save('AES.xls')
 
 
 
